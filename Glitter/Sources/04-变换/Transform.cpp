@@ -13,6 +13,9 @@
 #include "filesystem.hpp"
 #include "shader.hpp"
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 static int SRC_W = 1280;
 static int SRC_H = 800;
 
@@ -103,6 +106,14 @@ void renderScreen(GLFWwindow *window, Shader &shader,unsigned int texture0) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D,texture0);
     
+    glm::mat4 transform = glm::mat4(1);
+    
+//    transform = glm::rotate(transform, glm::radians(90.0f), glm::vec3(0.0f,0.0f,1.0f));
+//    shader.setMat4("transform", transform);
+    
+    transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f,0.0f,1.0f));
+    shader.setMat4("transform", transform);
+
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     
