@@ -1,4 +1,5 @@
 
+
 #include "glitter.hpp"
 
 // System Headers
@@ -35,7 +36,7 @@ void initLib() {
 
 GLFWwindow *createWindow() {
     // createWindow
-    GLFWwindow *window = glfwCreateWindow(SCR_W, SCR_H, "基本图元绘制", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(SCR_W, SCR_H, "摄像机", nullptr, nullptr);
     if (window == nullptr) {
         fprintf(stderr, "创建窗口失败...\n");
         return nullptr;
@@ -56,42 +57,62 @@ void processInput(GLFWwindow *window) {
         glfwSetWindowShouldClose(window, true);
 }
 
-unsigned int VAO,VBO, EBO;
+unsigned int VAO,VBO;
 void initBuffersData() {
     // 顶点数据
     float vertices[] = {
-        // positions          // texture coords
-        0.5f,  0.5f, 0.0f,   1.0f, 1.0f, // top right
-        0.5f, -0.5f, 0.0f,   1.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, // bottom left
-        -0.5f,  0.5f, 0.0f,   0.0f, 1.0f  // top left
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
     
-//    float vertices[] = {
-//        // positions          // texture coords
-//        1.0f,  1.0f, 0.0f,   1.0f, 1.0f, // top right
-//        1.0f, -1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-//        -1.0f, -1.0f, 0.0f,   0.0f, 0.0f, // bottom left
-//        -1.0f,  1.0f, 0.0f,   0.0f, 1.0f  // top left
-//    };
-    
-    
-    unsigned int indices[] = {
-        0, 1, 3, // first triangle
-        1, 2, 3  // second triangle
-    };
-    
+
     glGenBuffers(1,&VBO);// 创建一个索引
-    glGenBuffers(1,&EBO);
     glGenVertexArrays(1,&VAO);
     
     glBindVertexArray(VAO);
     
     glBindBuffer(GL_ARRAY_BUFFER,VBO);
     glBufferData(GL_ARRAY_BUFFER,sizeof(vertices),vertices,GL_STATIC_DRAW); // 将顶点数据放到GPU内存
-    
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
     
     //告诉OpenGL如何解析上面的内存
     // position attribute
@@ -118,48 +139,17 @@ void renderScreen(GLFWwindow *window, Shader &shader,unsigned int texture0) {
     glm::mat4 model         = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
     glm::mat4 view          = glm::mat4(1.0f);
     glm::mat4 projection    = glm::mat4(1.0f);
-    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(-30.0f), glm::vec3(0.5f, 1.0f, 0.0f));
     view  = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
     projection = glm::perspective(glm::radians(45.0f), (float)SCR_W / (float)SCR_H, 0.1f, 100.0f);
     
-//    projection = glm::mat4(glm::vec4(1.0f, 0.0f, 0.0f,0.0f),
-//                           glm::vec4(0.0f,1.0f, 0.0f,0.0f),
-//                           glm::vec4(0.0f, 0.0f,-0.02f,0.0f),
-//                           glm::vec4(0.0f, 0.0f, -1.0f,1.0f));
-    
-//   projection =  glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.1f, 100.0f);
-    
-//    template <typename T>
-//    GLM_FUNC_QUALIFIER tmat4x4<T, defaultp> orthoRH
-//    (
-//     T left, T right,
-//     T bottom, T top,
-//     T zNear, T zFar
-//     )
-//    {
-//        tmat4x4<T, defaultp> Result(1);
-//        Result[0][0] = static_cast<T>(2) / (right - left);
-//        Result[1][1] = static_cast<T>(2) / (top - bottom);
-//        Result[3][0] = - (right + left) / (right - left);
-//        Result[3][1] = - (top + bottom) / (top - bottom);
-//
-//#        if GLM_DEPTH_CLIP_SPACE == GLM_DEPTH_ZERO_TO_ONE
-//        Result[2][2] = - static_cast<T>(1) / (zFar - zNear);
-//        Result[3][2] = - zNear / (zFar - zNear);
-//#        else
-//        Result[2][2] = - static_cast<T>(2) / (zFar - zNear);
-//        Result[3][2] = - (zFar + zNear) / (zFar - zNear);
-//#        endif
-//
-//        return Result;
-//    }
-
     shader.setMat4("model", model);
     shader.setMat4("view", view);
     shader.setMat4("projection", projection);
     
     glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
     
     // Flip Buffers and Draw
     glfwSwapBuffers(window);
@@ -181,8 +171,10 @@ int main(int argc, char * argv[]) {
     // 初始化顶点数据和buffer
     initBuffersData();
     
+    glEnable(GL_DEPTH_TEST );
+    
     // 创建着色器程序
-    Shader ourShader(FileSystem::getGLSLPath("05-坐标系统/coordinate.vs").c_str(), FileSystem::getGLSLPath("05-坐标系统/coordinate.fs").c_str());
+    Shader ourShader(FileSystem::getGLSLPath("06-摄像机/camera.vs").c_str(), FileSystem::getGLSLPath("06-摄像机/camera.fs").c_str());
     
     // 加载纹理
     unsigned int awesonfaceTexture =  loadTexture(FileSystem::getTexturePath("awesomeface.png"));
@@ -195,7 +187,7 @@ int main(int argc, char * argv[]) {
         
         // Background Fill Color
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         renderScreen(window,ourShader,awesonfaceTexture);
         
@@ -203,7 +195,6 @@ int main(int argc, char * argv[]) {
     
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
     
     glfwTerminate();
     
@@ -250,4 +241,5 @@ unsigned int loadTexture(const std::string &path) {
     
     return texture;
 }
+
 
