@@ -48,7 +48,7 @@ $ \begin{bmatrix}  \color{red}1 & \color{red}0 & \color{red}0 & \color{red}{T_x}
 
 我们可以知道的一点是，如果以观察者为参照物，那么离观察者越远，`z`值越大，看下面的例子
 
-![](http://latex.codecogs.com/gif.latex?\begin{bmatrix}%201%20&%200%20&%200%20&%200%20\\%200%20&%201%20&%200%20&%200%20\\%200%20&%200%20&%201%20&%200%20\\%200%20&%200%20&%201%20&%200%20\end{bmatrix}%20\begin{bmatrix}%202%20\\%203%20\\%204%20\\%201%20\end{bmatrix}%20=%20\begin{bmatrix}%202%20\\%203%20\\%204%20\\%204%20\end{bmatrix})
+$\begin{bmatrix}  1 & 0 & 0 & 0 \\  0 & 1 & 0 & 0 \\  0 & 0 & 1 & 0 \\  0 & 0 & 1 & 0  \end{bmatrix}  \begin{bmatrix} 2 \\ 3 \\ 4 \\ 1 \end{bmatrix} =  \begin{bmatrix} 2 \\ 3 \\ 4 \\ 4 \end{bmatrix}$
 
 可以看到通过左边的透视矩阵，将点的`z`值来影响`w`分量的，然后通过除以`w`分量，下面展示了什么是透视除法
 
