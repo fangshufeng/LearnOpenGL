@@ -211,7 +211,12 @@ int main(int argc, char * argv[]) {
         glm::mat4 model = glm::mat4(1.0f);
         objectShader.setMat4("model", model);
     
-        glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+//        glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+        glm::vec3 lightColor;
+        lightColor.x = sin(glfwGetTime() * 2.0f);
+        lightColor.y = sin(glfwGetTime() * 0.7f);
+        lightColor.z = sin(glfwGetTime() * 1.3f);
+        
         glm::vec3 objectColor = glm::vec3(1.0f, 0.5f, 0.31f);
         
         objectShader.setVec3("light.position", lightPos);
