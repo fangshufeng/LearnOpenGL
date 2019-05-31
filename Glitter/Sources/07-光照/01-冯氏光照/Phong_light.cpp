@@ -31,6 +31,8 @@ float lastY = SCR_H / 2.0f;
 bool firstMouse = true;
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
+glm::vec3 lightPos = glm::vec3(1.2f, 1.0f, 2.0f);
+
 unsigned int loadTexture(const std::string &path);
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -92,47 +94,47 @@ unsigned int VAO,VBO;
 void initBuffersData() {
     // 顶点数据
     float vertices[] = {
-        -0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f, -0.5f,
-        0.5f,  0.5f, -0.5f,
-        0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
         
-        -0.5f, -0.5f,  0.5f,
-        0.5f, -0.5f,  0.5f,
-        0.5f,  0.5f,  0.5f,
-        0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
         
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
         
-        0.5f,  0.5f,  0.5f,
-        0.5f,  0.5f, -0.5f,
-        0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f,  0.5f,
-        0.5f,  0.5f,  0.5f,
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+        0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
         
-        -0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f,  0.5f,
-        0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
         
-        -0.5f,  0.5f, -0.5f,
-        0.5f,  0.5f, -0.5f,
-        0.5f,  0.5f,  0.5f,
-        0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
     };
     
     glGenBuffers(1,&VBO);// 创建一个索引
@@ -146,9 +148,12 @@ void initBuffersData() {
     
     //告诉OpenGL如何解析上面的内存
     // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    
     
     glBindBuffer(GL_ARRAY_BUFFER,0);
     glBindVertexArray(0);
@@ -178,9 +183,9 @@ int main(int argc, char * argv[]) {
     glEnable(GL_DEPTH_TEST );
     
     // 创建着色器程序
-    Shader objectShader(FileSystem::getGLSLPath("07-光照/颜色/colors.vs").c_str(), FileSystem::getGLSLPath("07-光照/颜色/colors.fs").c_str());
+    Shader objectShader(FileSystem::getGLSLPath("07-光照/01-冯氏光照/phong.vs").c_str(), FileSystem::getGLSLPath("07-光照/01-冯氏光照/phong.fs").c_str());
     
-    Shader lightShader(FileSystem::getGLSLPath("07-光照/颜色/light.vs").c_str(), FileSystem::getGLSLPath("07-光照/颜色/light.fs").c_str());
+    Shader lightShader(FileSystem::getGLSLPath("07-光照/01-冯氏光照/phong_light.vs").c_str(), FileSystem::getGLSLPath("07-光照/01-冯氏光照/phong_light.fs").c_str());
     
     
     while (glfwWindowShouldClose(window) == false) {
@@ -205,15 +210,12 @@ int main(int argc, char * argv[]) {
         objectShader.setMat4("projection", projection);
         glm::mat4 model = glm::mat4(1.0f);
         objectShader.setMat4("model", model);
-        
-
-        glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
-//        glm::vec3 lightColor = glm::vec3(0.0f, 1.0f, 0.0f);
     
+        glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+        //        glm::vec3 lightColor = glm::vec3(0.0f, 1.0f, 0.0f);
         objectShader.setVec3("lightColor", lightColor);
-        
         objectShader.setVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
-        
+        objectShader.setVec3("lightPos", lightPos);
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         
@@ -222,12 +224,11 @@ int main(int argc, char * argv[]) {
         lightShader.setMat4("projection", projection);
         lightShader.setMat4("view", view);
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(1.2f, 1.0f, 2.0f));
+        model = glm::translate(model, lightPos);
         model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
         lightShader.setMat4("model", model);
         
         lightShader.setVec3("lightColor", lightColor);
-        
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         
