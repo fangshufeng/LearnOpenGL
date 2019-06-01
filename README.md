@@ -4,8 +4,29 @@
 
 ### 安装一些子依赖
 
+
+```
+git clone https://github.com/fangshufeng/LearnOpenGL.git
+
+```
+
+目录如下
+
+
+```
+|-blogs
+|-CMakeLists.txt
+|-Glitter
+|-README.md
+|-Samples
+```
+
 ```sh
-cd Glitter/Vendor
+
+
+cd Glitter
+mkdir Vendor
+cd Vendor
 
 git clone  https://github.com/assimp/assimp.git
 git clone -b c https://github.com/Dav1dde/glad.git
@@ -15,9 +36,16 @@ git clone  https://github.com/nothings/stb.git
 git clone  https://github.com/bulletphysics/bullet3.git bullet
 ```
 
+
 ### 生成xcode工程
 
-回到项目目录,执行下面的命令
+回到项目目录
+
+```
+cd ../..
+```
+
+执行下面的命令
 
 ```
 mkdir Build
@@ -25,6 +53,18 @@ cd Build
 cmake -G "Xcode" ../.
 
 ```
+
+添加`Source`文件夹
+
+![image](https://user-images.githubusercontent.com/16829768/58740495-66918980-8443-11e9-94dd-a573b7b269ec.png)
+
+打开任意你想运行的`.cpp`文件，比如`Texture_filtering.cpp`
+
+![image](https://user-images.githubusercontent.com/16829768/58740490-61343f00-8443-11e9-99cb-0193952e7561.png)
+运行结果
+
+![](https://user-images.githubusercontent.com/16829768/58221260-7a9f0200-7d44-11e9-8db6-fed26a3a6584.png)
+
 
 ## 目的
 
