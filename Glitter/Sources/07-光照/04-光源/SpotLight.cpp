@@ -230,7 +230,7 @@ int main(int argc, char * argv[]) {
     
         glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
         
-        objectShader.setVec3("light.position", lightPos);
+        objectShader.setVec3("light.position", camera.Position);
         objectShader.setVec3("light.ambient",  lightColor * glm::vec3(0.2f));
         objectShader.setVec3("light.diffuse",  lightColor * glm::vec3(0.5f));
         objectShader.setVec3("light.specular", glm::vec3(1.0f));
@@ -239,7 +239,8 @@ int main(int argc, char * argv[]) {
         objectShader.setFloat("light.linear", 0.09f);
         objectShader.setFloat("light.quadratic", 0.032f);
         
-        objectShader.setVec3("light.specular", glm::vec3(1.0f));
+        objectShader.setVec3("light.spotDir",  camera.Front);
+        objectShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
         
     
         objectShader.setVec3("material.specular", glm::vec3(0.5f));
@@ -269,7 +270,7 @@ int main(int argc, char * argv[]) {
         lightShader.setMat4("projection", projection);
         lightShader.setMat4("view", view);
         model = glm::mat4(1.0f);
-        model = glm::translate(model, lightPos);
+        model = glm::translate(model, camera.Front);
         model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
         lightShader.setMat4("model", model);
         

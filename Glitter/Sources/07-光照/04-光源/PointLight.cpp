@@ -196,7 +196,7 @@ int main(int argc, char * argv[]) {
     glEnable(GL_DEPTH_TEST );
     
     // 创建着色器程序
-    Shader objectShader(FileSystem::getGLSLPath("07-光照/03-物体的贴图/light_maps.vs").c_str(), FileSystem::getGLSLPath("07-光照/04-光源/spotlight.fs").c_str());
+    Shader objectShader(FileSystem::getGLSLPath("07-光照/03-物体的贴图/light_maps.vs").c_str(), FileSystem::getGLSLPath("07-光照/04-光源/pointlight.fs").c_str());
     Shader lightShader(FileSystem::getGLSLPath("07-光照/01-冯氏光照/phong_light.vs").c_str(), FileSystem::getGLSLPath("07-光照/01-冯氏光照/phong_light.fs").c_str());
     
    unsigned int cantainer =  loadTexture(FileSystem::getTexturePath("container2.png"));
