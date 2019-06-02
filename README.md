@@ -1,5 +1,12 @@
 # LearnOpenGL
 
+ * [LearnOpenGL](#learnopengl)
+      * [使用](#使用)
+         * [安装一些子依赖](#安装一些子依赖)
+         * [生成xcode工程](#生成xcode工程)
+      * [目的](#目的)
+      * [<a href="https://github.com/Polytonic/Glitter">感谢</a>](#感谢)
+       
 ## 使用
 
 ### 安装一些子依赖
@@ -77,6 +84,10 @@ cmake -G "Xcode" ../.
 * [03.Texture](https://github.com/fangshufeng/LearnOpenGL/blob/master/blogs/03.Texture.md)
 * [04-transform](https://github.com/fangshufeng/LearnOpenGL/blob/master/blogs/04-transform.md)
 * [05-CoordinateSystem](https://github.com/fangshufeng/LearnOpenGL/blob/master/blogs/05-CoordinateSystem.md)
+* [06-Light](https://github.com/fangshufeng/LearnOpenGL/blob/master/blogs/06-Light.md)
 
-[感谢](https://github.com/Polytonic/Glitter)
+## 感谢
+
+1. [Glitter](https://github.com/Polytonic/Glitter)
+2. [LearnOpenGL CN](https://learnopengl-cn.github.io/01%20Getting%20started/01%20OpenGL/)
 
