@@ -5,7 +5,7 @@
          * [安装一些子依赖](#安装一些子依赖)
          * [生成xcode工程](#生成xcode工程)
       * [目的](#目的)
-      * [<a href="https://github.com/Polytonic/Glitter">感谢</a>](#感谢)
+      * [感谢](#感谢)
        
 ## 使用
 
