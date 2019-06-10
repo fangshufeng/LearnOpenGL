@@ -196,7 +196,7 @@ int main(int argc, char * argv[]) {
     initBuffersData();
     
     glEnable(GL_DEPTH_TEST );
-//    glDepthFunc(GL_ALWAYS);
+//    glDepthFunc(GL_LESS);
     
     // 创建着色器程序
     Shader shader(FileSystem::getGLSLPath("08-深度测试/depth.vs").c_str(), FileSystem::getGLSLPath("08-深度测试/depth.fs").c_str());
