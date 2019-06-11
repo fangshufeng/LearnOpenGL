@@ -181,20 +181,13 @@ void initBuffersData() {
 unsigned int cubeTexture;
 unsigned int planeTexture;
 
-glm::mat4 view ;
-glm::mat4 projection;
-
 void drawPlane( Shader &shader) {
     
     glBindTexture(GL_TEXTURE_2D,planeTexture);
+    shader.use();
     
     glm::mat4 model = glm::mat4(1.0f);
-    
-    shader.use();
-    shader.setMat4("view", view);
-    shader.setMat4("projection", projection);
     shader.setMat4("model", model);
-    
     glBindVertexArray(planeVAO);
     glDrawArrays(GL_TRIANGLES,0,6);
     glBindVertexArray(0);
@@ -204,6 +197,7 @@ void drawCubes( Shader &shader) {
     // cubes
     glBindVertexArray(cubeVAO);
     glBindTexture(GL_TEXTURE_2D, cubeTexture);
+    shader.use();
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
     shader.setMat4("model", model);
@@ -219,14 +213,12 @@ void drawCubes( Shader &shader) {
 void drawBorderCubes( Shader &shader) {
     
     float scale = 1.1;
-    shader.use();
-    shader.setMat4("view", view);
-    shader.setMat4("projection", projection);
-    
     // cubes
     glBindVertexArray(cubeVAO);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, cubeTexture);
+    shader.use();
+    
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
     model = glm::scale(model, glm::vec3(scale, scale, scale));
@@ -282,8 +274,17 @@ int main(int argc, char * argv[]) {
         
         processInput(window);
         
-        view = camera.GetViewMatrix();
-        projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_W / (float)SCR_H, 0.1f, 100.0f);
+        glm::mat4  view = camera.GetViewMatrix();
+        glm::mat4  projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_W / (float)SCR_H, 0.1f, 100.0f);
+        
+        shader.use();
+        shader.setMat4("view", view);
+        shader.setMat4("projection", projection);
+        
+        borderShader.use();
+        borderShader.setMat4("view", view);
+        borderShader.setMat4("projection", projection);
+     
         
         // Background Fill Color
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
