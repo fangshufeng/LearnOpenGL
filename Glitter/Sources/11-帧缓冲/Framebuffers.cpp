@@ -290,7 +290,7 @@ int main(int argc, char * argv[]) {
     Shader screenShader(FileSystem::getGLSLPath("11-帧缓冲/screen.vs").c_str(), FileSystem::getGLSLPath("11-帧缓冲/screen.fs").c_str());
     
     // 加载纹理
-    cubeTexture =  loadTexture(FileSystem::getTexturePath("marble.jpg"));
+    cubeTexture =  loadTexture(FileSystem::getTexturePath("container.jpg"));
     planeTexture =  loadTexture(FileSystem::getTexturePath("metal.png"));
     
     shader.use();
