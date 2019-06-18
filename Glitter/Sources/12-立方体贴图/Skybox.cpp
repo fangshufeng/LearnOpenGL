@@ -61,7 +61,7 @@ GLFWwindow *createWindow() {
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
     
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+//    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     
     return window;
 }
@@ -178,7 +178,7 @@ int main(int argc, char * argv[]) {
     glEnable(GL_DEPTH_TEST );
     
     // 创建着色器程序
-    Shader shader(FileSystem::getGLSLPath("12-天空盒/skybox.vs").c_str(), FileSystem::getGLSLPath("12-天空盒/skybox.fs").c_str());
+    Shader shader(FileSystem::getGLSLPath("12-立方体贴图/skybox.vs").c_str(), FileSystem::getGLSLPath("12-立方体贴图/skybox.fs").c_str());
     
     
     std::vector<std::string> faces {
