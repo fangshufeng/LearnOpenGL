@@ -172,7 +172,7 @@ void renderScreen() {
     glUniform4f(location,1.0f,0.0f,0.0f,1.0f);
     glDrawArrays(GL_LINE_STRIP,1,6);
 
-    // 画点
+    // 画点 改变点的大小请看 14-几何着色器/Geometry.cpp
     glPointSize(80.0f);
     glUniform4f(location,0.0f,1.0f,0.0f,1.0f);
     glDrawArrays(GL_POINTS,0,1);
