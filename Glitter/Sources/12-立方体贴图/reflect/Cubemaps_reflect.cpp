@@ -227,7 +227,7 @@ int main(int argc, char * argv[]) {
     
     // 创建着色器程序
     Shader shader(FileSystem::getGLSLPath("12-立方体贴图/skybox.vs").c_str(), FileSystem::getGLSLPath("12-立方体贴图/skybox.fs").c_str());
-    Shader cubeShader(FileSystem::getGLSLPath("12-立方体贴图/cubemaps_reflect.vs").c_str(), FileSystem::getGLSLPath("12-立方体贴图/cubemaps_reflect.fs").c_str());
+    Shader cubeShader(FileSystem::getGLSLPath("12-立方体贴图/reflect/cubemaps_reflect.vs").c_str(), FileSystem::getGLSLPath("12-立方体贴图/reflect/cubemaps_reflect.fs").c_str());
     
     
     std::vector<std::string> faces {
