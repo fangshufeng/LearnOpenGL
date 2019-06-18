@@ -108,6 +108,12 @@ int main(int argc, char * argv[]) {
                   FileSystem::getGLSLPath("14-几何着色器/color_hourse/color_house.fs").c_str(),
                   FileSystem::getGLSLPath("14-几何着色器/color_hourse/color_house.gs").c_str());
     
+    // 有白色屋顶的
+//    Shader shader(FileSystem::getGLSLPath("14-几何着色器/color_hourse/color_house.vs").c_str(),
+//                  FileSystem::getGLSLPath("14-几何着色器/color_hourse/color_house.fs").c_str(),
+//                  FileSystem::getGLSLPath("14-几何着色器/color_hourse/color_house_top.gs").c_str());
+    
+    
     while (glfwWindowShouldClose(window) == false) {
         
         processInput(window);
