@@ -63,7 +63,7 @@ cmake -G "Xcode" ../.
 
 ```
 
-添加`Source`文件夹,打开任意你想运行的`.cpp`文件，比如`Texture_filtering.cpp`
+添加`Source`文件夹,打开任意你想运行的`.cpp`文件，比如`16-模型加载/LoadModel.cpp`
 
 ![image](https://user-images.githubusercontent.com/16829768/59560153-e58be200-903f-11e9-9547-b4920beb92f3.png)
 
@@ -71,7 +71,7 @@ cmake -G "Xcode" ../.
 
 运行结果
 
-![](https://user-images.githubusercontent.com/16829768/58221260-7a9f0200-7d44-11e9-8db6-fed26a3a6584.png)
+![](https://user-images.githubusercontent.com/16829768/60154434-e5e36480-9819-11e9-854e-ddf720d474a2.png)
 
 
 ## 笔记
@@ -88,6 +88,9 @@ cmake -G "Xcode" ../.
 * [06-Light](https://github.com/fangshufeng/LearnOpenGL/blob/master/blogs/06-Light.md)
 * [07-测试与混合](https://github.com/fangshufeng/LearnOpenGL/blob/master/blogs/07-TestAndBlend.md)
 * [08-帧缓冲与后期处理](https://github.com/fangshufeng/LearnOpenGL/blob/master/blogs/08-framebuffers.md)
+* [09-实例化](https://github.com/fangshufeng/LearnOpenGL/blob/master/blogs/09-instance.md)
+* [10-模型加载](https://github.com/fangshufeng/LearnOpenGL/blob/master/blogs/10-loadModel.md)
+* [11-抗锯齿](https://github.com/fangshufeng/LearnOpenGL/blob/master/blogs/11-antiAliasing.md)
 
 ## 感谢
 
