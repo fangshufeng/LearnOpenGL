@@ -56,7 +56,7 @@ void initLib() {
 
 GLFWwindow *createWindow() {
     // createWindow
-    GLFWwindow *window = glfwCreateWindow(SCR_W, SCR_H, "没有做抗锯齿操作", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(SCR_W, SCR_H, "离屏MSAA", nullptr, nullptr);
     if (window == nullptr) {
         fprintf(stderr, "创建窗口失败...\n");
         return nullptr;
@@ -92,7 +92,8 @@ void processInput(GLFWwindow *window) {
 
 // setup cube VAO
 unsigned int cubeVAO, cubeVBO;
-
+// setup screen VAO
+unsigned int quadVAO, quadVBO;
 void initBuffersData() {
     
     float cubeVertices[] = {
@@ -140,7 +141,17 @@ void initBuffersData() {
         -0.5f,  0.5f, -0.5f
     };
     
-
+    float quadVertices[] = {   // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+        // positions   // texCoords
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+        1.0f, -1.0f,  1.0f, 0.0f,
+        
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        1.0f, -1.0f,  1.0f, 0.0f,
+        1.0f,  1.0f,  1.0f, 1.0f
+    };
+    
     glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(1, &cubeVBO);
     glBindVertexArray(cubeVAO);
@@ -148,6 +159,72 @@ void initBuffersData() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    
+
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+}
+
+GLuint framebuffer;
+GLuint textureColorBufferMutisampler;
+void createMutisamplerAndBindTexture() {
+    
+    glGenFramebuffers(1,&framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER,framebuffer);
+    
+    // 创建多重采样纹理附件
+    
+    glGenTextures(1, &textureColorBufferMutisampler);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,textureColorBufferMutisampler);
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE,4,GL_RGB,SCR_W,SCR_H,GL_TRUE);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,0);
+    
+    // 将纹理附件添加到帧缓冲上
+    glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D_MULTISAMPLE,textureColorBufferMutisampler,0);
+    
+    // 创建深度和模板渲染缓冲对象
+    GLuint renderBufferObject;
+    glGenRenderbuffers(1,&renderBufferObject);
+    glBindRenderbuffer(GL_RENDERBUFFER,renderBufferObject);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER,4,GL_DEPTH24_STENCIL8,SCR_W,SCR_H);
+    glBindRenderbuffer(GL_RENDERBUFFER,0);
+    
+    // 将渲染缓冲对象绑定到帧缓冲上
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_STENCIL_ATTACHMENT,GL_RENDERBUFFER,renderBufferObject);
+    
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        cout << "ERROR::FRAMEBUFFER:: Intermediate framebuffer is not complete!" << endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+GLuint intermediaframebuffer;
+GLuint screenTexture;
+void createIntermediaFBO() {
+    
+    glGenFramebuffers(1,&intermediaframebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER,intermediaframebuffer);
+    
+    // 创建纹理附件
+    glGenTextures(1, &screenTexture);
+    glBindTexture(GL_TEXTURE_2D,screenTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_W, SCR_H, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    // 将纹理附件添加到帧缓冲上
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenTexture, 0);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        cout << "ERROR::FRAMEBUFFER:: Intermediate framebuffer is not complete!" << endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 #pragma clang diagnostic push
@@ -169,9 +246,19 @@ int main(int argc, char * argv[]) {
     
     glEnable(GL_DEPTH_TEST);
 
-    Shader cubeShader(FileSystem::getGLSLPath("17-抗锯齿/01没有做抗锯齿处理/anti_aliasing.vs").c_str(),
-                      FileSystem::getGLSLPath("17-抗锯齿/01没有做抗锯齿处理/anti_aliasing.fs").c_str());
+    Shader cubeShader(FileSystem::getGLSLPath("17-抗锯齿/02-离屏MSAA/anti_aliasing_msaa.vs").c_str(),
+                      FileSystem::getGLSLPath("17-抗锯齿/02-离屏MSAA/anti_aliasing_msaa.fs").c_str());
     
+    Shader quadShader(FileSystem::getGLSLPath("17-抗锯齿/02-离屏MSAA/off_screen_msaa.vs").c_str(),
+                      FileSystem::getGLSLPath("17-抗锯齿/02-离屏MSAA/off_screen_msaa.fs").c_str());
+    
+    createMutisamplerAndBindTexture();
+    createIntermediaFBO();
+    
+    quadShader.use();
+    quadShader.setInt("screenTexture", 0);
+
+//     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);    
     
     while (glfwWindowShouldClose(window) == false) {
         
@@ -185,6 +272,12 @@ int main(int argc, char * argv[]) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
        
+       
+        glBindFramebuffer(GL_FRAMEBUFFER,framebuffer);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
+        
         cubeShader.use();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_W / (float)SCR_H, 0.1f, 1000.0f);
         cubeShader.setMat4("projection", projection);
@@ -193,6 +286,24 @@ int main(int argc, char * argv[]) {
         
         glBindVertexArray(cubeVAO);
         glDrawArrays(GL_TRIANGLES,0,36);
+        glBindVertexArray(0);
+        
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediaframebuffer);
+        glBlitFramebuffer(0, 0, SCR_W, SCR_H, 0, 0, SCR_W, SCR_H, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        
+        
+        // 切换到默认缓冲
+        glBindFramebuffer(GL_FRAMEBUFFER,0);
+        glDisable(GL_DEPTH_TEST);
+         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT );
+        
+        quadShader.use();
+        glBindVertexArray(quadVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE,screenTexture);
+        glDrawArrays(GL_TRIANGLES,0,6);
         glBindVertexArray(0);
         
         // Flip Buffers and Draw
