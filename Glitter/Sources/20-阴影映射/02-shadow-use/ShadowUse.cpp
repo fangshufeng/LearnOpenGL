@@ -25,7 +25,7 @@
 #include <stb_image.h>
 
 static int SCR_W = 1280;
-static int SCR_H = 800;
+static int SCR_H = 720;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -196,42 +196,69 @@ void initBuffersData() {
 }
 
 
-void drawCube(GLuint floorTexture) {
-    // draw cube
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE,floorTexture);
+void drawCube() {
     glBindVertexArray(cubeVAO);
     glDrawArrays(GL_TRIANGLES,0,36);
     glBindVertexArray(0);
 }
 
-void drawScene(const Shader &shader, GLuint floorTexture) {
+void drawScene(const Shader &shader) {
     // draw plane
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE,floorTexture);
+    glm::mat4 model = glm::mat4(1.0f);
+    shader.setMat4("model", model);
     glBindVertexArray(planeVAO);
     glDrawArrays(GL_TRIANGLES,0,36);
     glBindVertexArray(0);
-    
+
     //cubes
-    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, 1.5f, 0.0));
     model = glm::scale(model, glm::vec3(0.5f));
     shader.setMat4("model", model);
-    drawCube(floorTexture);
-    
+    drawCube();
+
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(2.0f, 0.0f, 1.0));
     model = glm::scale(model, glm::vec3(0.5f));
     shader.setMat4("model", model);
-    drawCube(floorTexture);
-    
+    drawCube();
+
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(-1.0f, 0.0f, 2.0));
     model = glm::rotate(model, glm::radians(60.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
     model = glm::scale(model, glm::vec3(0.25));
     shader.setMat4("model", model);
-    drawCube(floorTexture);
+    drawCube();
+}
+
+GLuint depthFBO;
+GLuint depthTexture;
+ const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+void createDepthFrameBuffer() {
+
+    glGenFramebuffers(1,&depthFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER,depthFBO);
+
+    // 创建一个深度纹理
+    glGenTextures(1,&depthTexture);
+    glBindTexture(GL_TEXTURE_2D,depthTexture);
+    glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,SHADOW_WIDTH,SHADOW_HEIGHT,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    // 绑定纹理到帧缓冲
+    glBindFramebuffer(GL_FRAMEBUFFER,depthFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,depthTexture,0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        cout << "ERROR::FRAMEBUFFER:: depth framebuffer is not complete!" << endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 #pragma clang diagnostic push
@@ -240,53 +267,79 @@ int main(int argc, char * argv[]) {
 #pragma clang diagnostic pop
     // 初始化第三方库
     initLib();
-    
+
     // 创建窗口
     GLFWwindow *window = createWindow();
     if (window == nullptr) return -1;
-    
+
     // 绑定OpenGL函数地址
     bindFunctionAddress();
-    
+
     // 初始化顶点数据和buffer
     initBuffersData();
-    
-    glEnable(GL_DEPTH_TEST);
 
     Shader planeShader(FileSystem::getGLSLPath("20-阴影映射/02-shadow-use/shadow_map_use.vs").c_str(),
                       FileSystem::getGLSLPath("20-阴影映射/02-shadow-use/shadow_map_use.fs").c_str());
+
+    Shader depthShader(FileSystem::getGLSLPath("20-阴影映射/02-shadow-use/shadow_depth.vs").c_str(),
+                       FileSystem::getGLSLPath("20-阴影映射/02-shadow-use/shadow_depth.fs").c_str());
+
+    createDepthFrameBuffer();
     
+
     GLuint floorTexture = loadTexture(FileSystem::getTexturePath("wood.png"));
-    
+
     // plane set
     planeShader.use();
     planeShader.setInt("material.diffuse", 0);
-    
+    planeShader.setInt("shadowMap", 1);
+
     glm::vec3 lightColor = glm::vec3(1.0f,1.0f,1.0f);
     glm::vec3 lightPosition = glm::vec3(-2.0f, 4.0f, -1.0f);
     planeShader.setVec3("light.position", lightPosition);
-    planeShader.setVec3("light.ambient", lightColor * glm::vec3(0.3));
+    planeShader.setVec3("light.ambient", lightColor * glm::vec3(0.2));
     planeShader.setVec3("light.diffuse", lightColor * glm::vec3(0.3));
     planeShader.setVec3("light.specular", lightColor * glm::vec3(0.3f));
-    
+
     planeShader.setVec3("material.specular", glm::vec3(0.5f));
     planeShader.setFloat("material.shiness", 64.0f);
-    
-    planeShader.setVec3("lightPos", lightPosition);
-    
 
+    planeShader.setVec3("lightPos", lightPosition);
+
+    glEnable(GL_DEPTH_TEST);
+    
     while (glfwWindowShouldClose(window) == false) {
-        
+
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-        
+
         processInput(window);
         
-        // Background Fill Color
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-       
+
+        depthShader.use();
+        glm::mat4 lightProjection, lightView, lightSpaceMatrix;
+        float near_plane = 1.0f, far_plane = 7.5f;
+        lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+        lightView = glm::lookAt(lightPosition, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+        lightSpaceMatrix = lightProjection * lightView;
+        depthShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+        // 渲染到深度帧缓冲
+        glBindFramebuffer(GL_FRAMEBUFFER,depthFBO);
+        glViewport(0, 0, SHADOW_WIDTH  , SHADOW_HEIGHT);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear( GL_DEPTH_BUFFER_BIT);
+        drawScene(depthShader);
+
+        // 切换到默认帧缓冲
+        glBindFramebuffer(GL_FRAMEBUFFER,0);
+        glViewport(0, 0, SCR_W * 2, SCR_H * 2);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         planeShader.use();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_W / (float)SCR_H, 0.1f, 100.0f);
         glm::mat4 model(1.0f);
@@ -294,28 +347,35 @@ int main(int argc, char * argv[]) {
         planeShader.setMat4("view", camera.GetViewMatrix());
         planeShader.setMat4("model", glm::mat4(1.0f));
         planeShader.setVec3("viewPos", camera.Position);
-        
-        drawScene(planeShader,floorTexture);
-     
+        planeShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D,floorTexture);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D,depthTexture);
+        drawScene(planeShader);
+
         // Flip Buffers and Draw
         glfwSwapBuffers(window);
         glfwPollEvents();
-        
+
     }
     
-
-    glfwTerminate();
+    glDeleteVertexArrays(1, &planeVAO);
+    glDeleteBuffers(1, &planeVBO);
     
+    glDeleteVertexArrays(1, &cubeVAO);
+    glDeleteBuffers(1, &cubeVBO);
+    glfwTerminate();
+
     return 0;
 }
-
 
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 #pragma clang diagnostic pop
-    
     glViewport(0, 0, width, height);
 }
 
@@ -323,20 +383,20 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 #pragma clang diagnostic ignored "-Wunused-parameter"
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 #pragma clang diagnostic pop
-    
+
     if (firstMouse)
     {
         lastX = xpos;
         lastY = ypos;
         firstMouse = false;
     }
-    
+
     float xoffset = xpos - lastX;
     float yoffset = lastY - ypos;
-    
+
     lastX = xpos;
     lastY = ypos;
-    
+
     camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
@@ -348,16 +408,16 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 }
 
 unsigned int loadTexture(const std::string &path) {
-    
+
     unsigned int texture;
     glGenTextures(1,&texture);
     glBindTexture(GL_TEXTURE_2D,texture); // 2d纹理
-    
+
     // 读取图片到内存中
     int width,height,nrComponents;
     stbi_set_flip_vertically_on_load(true);
     unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrComponents, 0);
-    
+
     // d绑定到buffer上
     if (data != nullptr) {
         GLenum format = GL_RGBA ;
@@ -368,10 +428,10 @@ unsigned int loadTexture(const std::string &path) {
         } else if (nrComponents == 4) {
             format = GL_RGBA;
         }
-        
+
         glTexImage2D(GL_TEXTURE_2D,0,format,width,height,0,format,GL_UNSIGNED_BYTE,data);
         glGenerateMipmap(GL_TEXTURE_2D);
-        
+
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -380,8 +440,8 @@ unsigned int loadTexture(const std::string &path) {
     } else {
         std::cout << "Texture failed to load at path: " << path << std::endl;
     }
-    
+
     stbi_image_free(data);
-    
+
     return texture;
 }
