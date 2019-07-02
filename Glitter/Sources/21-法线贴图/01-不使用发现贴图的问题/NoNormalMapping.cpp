@@ -187,6 +187,7 @@ int main(int argc, char * argv[]) {
         shader.setMat4("projection", projection);
         shader.setMat4("view", view);
         glm::mat4 model = glm::mat4(1.0f);
+//         model = glm::rotate(model, glm::radians((float)glfwGetTime() * -10.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
         shader.setMat4("model", model);
         
         shader.setVec3("viewPos", camera.Position);
