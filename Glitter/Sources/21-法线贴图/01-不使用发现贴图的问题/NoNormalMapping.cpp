@@ -78,6 +78,9 @@ void bindFunctionAddress() {
     }
 }
 
+bool normalMapOpen = false;
+bool normalMapOpenKeyPressed = false;
+
 void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -90,6 +93,15 @@ void processInput(GLFWwindow *window) {
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
+    
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && !normalMapOpenKeyPressed) {
+        normalMapOpen = !normalMapOpen;
+        normalMapOpenKeyPressed = true;
+    }
+    
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE) {
+        normalMapOpenKeyPressed = false;
+    }
 }
 
 
@@ -149,9 +161,11 @@ int main(int argc, char * argv[]) {
                        FileSystem::getGLSLPath("21-法线贴图/01-不使用发现贴图的问题/no_normal_mapping.fs").c_str());
     
     GLuint diffuseTexture = loadTexture(FileSystem::getTexturePath("brickwall.jpg"));
+    GLuint normalTexture = loadTexture(FileSystem::getTexturePath("brickwall_normal.jpg"));
     
     shader.use();
     shader.setInt("diffuseMap", 0);
+    shader.setInt("normalMap", 1);
     
      glm::vec3 lightPos(0.5f, 1.0f, 0.3f);
     while (glfwWindowShouldClose(window) == false) {
@@ -178,9 +192,14 @@ int main(int argc, char * argv[]) {
         shader.setVec3("viewPos", camera.Position);
         shader.setVec3("lightPos", lightPos);
         
+        shader.setBool("normalMapOpen", normalMapOpen);
+        
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D,diffuseTexture);
-
+        
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D,normalTexture);
+        
         glBindVertexArray(quadVAO);
         glDrawArrays(GL_TRIANGLES,0,6);
         glBindVertexArray(0);
