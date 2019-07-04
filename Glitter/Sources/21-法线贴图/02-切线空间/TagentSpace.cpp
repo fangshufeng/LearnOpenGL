@@ -81,6 +81,9 @@ void bindFunctionAddress() {
 bool normalMapOpen = false;
 bool normalMapOpenKeyPressed = false;
 
+bool TBNReverse = false;
+bool TBNReverseKeyPressed = false;
+
 void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -102,6 +105,16 @@ void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE) {
         normalMapOpenKeyPressed = false;
     }
+    
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS && !normalMapOpenKeyPressed) {
+        TBNReverse = !TBNReverse;
+        normalMapOpenKeyPressed = true;
+    }
+    
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_RELEASE) {
+        TBNReverseKeyPressed = false;
+    }
+    
 }
 
 
@@ -249,6 +262,7 @@ int main(int argc, char * argv[]) {
         shader.setVec3("lightPos", lightPos);
         
         shader.setBool("normalMapOpen", normalMapOpen);
+        shader.setBool("TBNReverse", TBNReverse);
         
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D,diffuseTexture);
