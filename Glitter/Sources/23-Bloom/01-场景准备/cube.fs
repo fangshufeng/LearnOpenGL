@@ -1,4 +1,5 @@
 
+
 #version 330 core
 
 out vec4 FragColor;
@@ -15,33 +16,30 @@ struct Light {
 };
 
 uniform Light lights[4];
-
 uniform sampler2D diffuseMap;
+uniform vec3 viewPos;
 
 void main() {
     
     vec3 color = texture(diffuseMap, fs_in.TexCoords).rgb;
     vec3 normal = normalize(fs_in.Normal);
-    
     // ambient
     vec3 ambient = 0.0 * color;
-    
     // lighting
     vec3 lighting = vec3(0.0);
+    vec3 viewDir = normalize(viewPos - fs_in.FragPos);
     for(int i = 0; i < 4; i++) {
         // diffuse
         vec3 lightDir = normalize(lights[i].Position - fs_in.FragPos);
-        float diff = max(dot(lightDir, -normal), 0.0);
-        vec3 diffuse = lights[i].Color * diff * color;
-        vec3 result = diffuse;
-        
+        float diff = max(dot(lightDir, normal), 0.0);
+        vec3 result = lights[i].Color * diff * color;
+        // attenuation (use quadratic as we have gamma correction)
         float distance = length(fs_in.FragPos - lights[i].Position);
-        float attenuation = 1 / (1.0 + 0.09 * distance +
-                                 0.032 * (distance * distance));
-        result *= attenuation;
-        
+        result *= 1.0 / (distance * distance);
         lighting += result;
+        
     }
-
-    FragColor = vec4(lighting, 1.0);
+    vec3 result = ambient + lighting;
+    
+    FragColor = vec4(result, 1.0);
 }
