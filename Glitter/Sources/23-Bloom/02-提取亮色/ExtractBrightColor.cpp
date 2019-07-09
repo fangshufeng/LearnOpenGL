@@ -56,7 +56,7 @@ void initLib() {
 
 GLFWwindow *createWindow() {
     // createWindow
-    GLFWwindow *window = glfwCreateWindow(SCR_W, SCR_H, "HDR", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(SCR_W, SCR_H, "02-提取亮色", nullptr, nullptr);
     if (window == nullptr) {
         fprintf(stderr, "创建窗口失败...\n");
         return nullptr;
@@ -81,6 +81,9 @@ bool openToneMappingKeyPressed = false;
 
 bool openExposure = false;
 bool openExposureKeyPressed = false;
+
+bool selectColorAttach = false;
+bool selectColorAttachKeyPressed = false;
 
 float exposure = 1.0f;
 void processInput(GLFWwindow *window) {
@@ -125,6 +128,15 @@ void processInput(GLFWwindow *window) {
             exposure -= 0.01f;
         else
             exposure = 0.0f;
+    }
+    
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && !selectColorAttachKeyPressed) {
+        selectColorAttach = !selectColorAttach;
+        selectColorAttachKeyPressed = true;
+    }
+    
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE) {
+        selectColorAttachKeyPressed = false;
     }
     
 }
@@ -232,26 +244,35 @@ void renderQuad() {
 
 // 初始化HDR buffer
 unsigned int hdrFBO;
-unsigned int colorBuffer;
+unsigned int colorBuffers[2];
 
 void createHDRFBO() {
     
     glGenFramebuffers(1, &hdrFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
     // create floating point color buffer
-    glGenTextures(1, &colorBuffer);
-    glBindTexture(GL_TEXTURE_2D, colorBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_W, SCR_H, 0, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glGenTextures(2, colorBuffers);
+    for (unsigned int i = 0; i < 2; i++) {
+        glBindTexture(GL_TEXTURE_2D, colorBuffers[i]);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCR_W, SCR_H, 0, GL_RGB, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);  // we clamp to the edge as the blur filter would otherwise sample repeated texture values!
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        // attach texture to framebuffer
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colorBuffers[i], 0);
+    }
     // create depth buffer (renderbuffer)
     unsigned int rboDepth;
     glGenRenderbuffers(1, &rboDepth);
     glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_W, SCR_H);
     // attach buffers
-    glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBuffer, 0);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+    
+    unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+    glDrawBuffers(2, attachments);
+    // finally check if framebuffer is complete
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         std::cout << "Framebuffer not complete!" << std::endl;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -279,10 +300,10 @@ int main(int argc, char * argv[]) {
                        FileSystem::getGLSLPath("23-Bloom/01-场景准备/final.fs").c_str());
     
     Shader planeAndCubsShader(FileSystem::getGLSLPath("23-Bloom/01-场景准备/cube.vs").c_str(),
-                  FileSystem::getGLSLPath("23-Bloom/01-场景准备/cube.fs").c_str());
+                  FileSystem::getGLSLPath("23-Bloom/02-提取亮色/cube_change.fs").c_str());
     
     Shader lightShader(FileSystem::getGLSLPath("23-Bloom/01-场景准备/light.vs").c_str(),
-                  FileSystem::getGLSLPath("23-Bloom/01-场景准备/light.fs").c_str());
+                  FileSystem::getGLSLPath("23-Bloom/02-提取亮色/light_change.fs").c_str());
     
     glEnable(GL_DEPTH_TEST);
 
@@ -418,7 +439,7 @@ int main(int argc, char * argv[]) {
         glDisable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D,colorBuffer);
+        glBindTexture(GL_TEXTURE_2D, selectColorAttach ?  colorBuffers[0] : colorBuffers[1]);
         renderQuad();
         
         // Flip Buffers and Draw
