@@ -44,6 +44,11 @@ void main() {
         specular *= attenuation;
         lighting += diffuse + specular;
     }
-    
+
     FragColor = vec4(lighting,1.0f);
+    
+//    FragColor = vec4(texture(positionMap,TexCoords).rgb,1.0f);
+//    FragColor = vec4(texture(normalMap,TexCoords).rgb,1.0f);
+//    FragColor = vec4(texture(diffuseMap,TexCoords).rgb,1.0f);
+//    FragColor = vec4(vec3(texture(positionMap,TexCoords).a),1.0f);
 }
